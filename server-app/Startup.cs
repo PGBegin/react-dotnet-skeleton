@@ -23,6 +23,8 @@ namespace server_app
 
         public IConfiguration Configuration { get; }
 
+        readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -32,6 +34,15 @@ namespace server_app
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "server_app", Version = "v1" });
             });
+
+
+            services.AddCors(o => o.AddPolicy(MyAllowSpecificOrigins, builder =>
+            {
+                builder.AllowAnyOrigin()    // Allow CORS Recest from all Origin
+                       .AllowAnyMethod()    // Allow All Http method
+                       .AllowAnyHeader();   // Allow All request header
+            }));
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -47,6 +58,8 @@ namespace server_app
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors(MyAllowSpecificOrigins);   // Add For CORS
 
             app.UseAuthorization();
 
