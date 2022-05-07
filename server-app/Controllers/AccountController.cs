@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using server_app.Services;
 
 namespace server_app.Controllers
 {
@@ -15,13 +16,13 @@ namespace server_app.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly  SignInManager<ApplicationUser> _signinManager;
-        //private readonly TokenService _tokenService;
+        private readonly TokenService _tokenService;
         public AccountController(UserManager<ApplicationUser> userManager
             ,SignInManager<ApplicationUser> signinManager
-             //,TokenService tokenService
+            ,TokenService tokenService
              )
         {
-            //_tokenService = tokenService;
+            _tokenService = tokenService;
             _signinManager = signinManager;
             _userManager = userManager;
         }
@@ -73,20 +74,21 @@ namespace server_app.Controllers
 
             return BadRequest("Problem regist User");
         }
-/*
+
         [Authorize]
         [HttpGet]
         public async Task<ActionResult<UserModel>> GetCurrentUser()
         {
+            var x = User;
             var user = await _userManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email));
             return CreateUserObject(user);
         }
-*/
+
         private UserModel CreateUserObject(ApplicationUser user)
         {
             return new UserModel
             {
-//                    Token = _tokenService.CreateToken(user),
+                    Token = _tokenService.CreateToken(user),
                     Username = user.UserName
             };
         }

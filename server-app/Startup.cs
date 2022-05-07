@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -13,11 +15,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using server_app.Data;
 using server_app.Models;
-
-
+using server_app.Services;
 
 namespace server_app
 {
@@ -30,7 +32,7 @@ namespace server_app
 
         public IConfiguration Configuration { get; }
 
-        readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+//        readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -54,12 +56,26 @@ namespace server_app
                  )
                  .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            services.AddCors(o => o.AddPolicy(MyAllowSpecificOrigins, builder =>
-            {
-                builder.AllowAnyOrigin()    // Allow CORS Recest from all Origin
-                       .AllowAnyMethod()    // Allow All Http method
-                       .AllowAnyHeader();   // Allow All request header
-            }));
+
+            //for jwt token
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["TokenKey"]));
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(opt =>
+                {
+                    opt.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = key,
+                        ValidateIssuer = false,
+                        ValidateAudience = false
+                    };
+                });
+            services.AddScoped<TokenService>();
+            //--------------------------------------------------------------------------------------
+
+
+            services.AddCors();
 
         }
 
@@ -75,9 +91,16 @@ namespace server_app
 
             app.UseHttpsRedirection();
 
-            app.UseRouting();
+            app.UseRouting();            
 
-            app.UseCors(MyAllowSpecificOrigins);   // Add For CORS
+            app.UseCors(builder => builder
+                .WithOrigins(new []{"http://localhost:3000","https://localhost:3000"})
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials()
+            );
+            
+            app.UseAuthentication();
 
             app.UseAuthorization();
 
