@@ -9,7 +9,7 @@ using server_app.Services;
 
 namespace server_app.Controllers
 {
-    [AllowAnonymous]
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class AccountController : ControllerBase
@@ -27,6 +27,7 @@ namespace server_app.Controllers
             _userManager = userManager;
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<ActionResult<UserModel>> Login(LoginModel loginModel)
         {
@@ -45,6 +46,7 @@ namespace server_app.Controllers
             return Unauthorized();
         }
 
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<ActionResult<UserModel>> Register(RegisterModel registerModel)
         {
@@ -75,7 +77,6 @@ namespace server_app.Controllers
             return BadRequest("Problem regist User");
         }
 
-        [Authorize]
         [HttpGet]
         public async Task<ActionResult<UserModel>> GetCurrentUser()
         {
