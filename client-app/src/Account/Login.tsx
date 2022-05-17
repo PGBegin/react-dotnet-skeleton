@@ -34,6 +34,8 @@ const Login = (
             setName(content.username);
             setToken(content.token);
 
+            window.localStorage.setItem('react_dotnet_skelton_jwt_token', content.token);
+
         }
 
     }

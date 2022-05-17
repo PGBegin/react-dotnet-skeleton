@@ -20,7 +20,11 @@ export const WeatherForecast: FC = () => {
   }, []);
 
   const populateWeatherData = async () => {
-    const response = await fetch('https://localhost:5001/weatherforecast');
+    const response = await fetch('https://localhost:5001/weatherforecast', {
+      headers: {
+        Authorization: `Bearer ${window.localStorage.getItem('react_dotnet_skelton_jwt_token')}`,
+      }
+    });
     const data = await response.json();
     setState({ forecasts: data, loading: false });
   };
